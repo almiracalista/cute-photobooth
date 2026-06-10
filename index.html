@@ -1,1 +1,98 @@
 <h1>Cute Photobooth</h1>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Photo Booth Lucu Pastel ✨</title>
+    <style>
+        :root {
+            --pastel-pink: #FFD1DC;
+            --pastel-blue: #AEC6CF;
+            --pastel-yellow: #FDFD96;
+            --bg-color: #FFF5F7;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            color: #555;
+        }
+
+        #dashboard { padding: 50px; }
+        
+        .btn {
+            padding: 15px 30px;
+            font-size: 20px;
+            background-color: var(--pastel-pink);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px #ffb3c1;
+        }
+
+        #booth-area { display: none; }
+
+        video, #photo-canvas {
+            width: 500px;
+            border: 10px solid white;
+            border-radius: 20px;
+            background: #eee;
+        }
+
+        .controls { margin-top: 20px; }
+        .filter-btn { margin: 5px; padding: 10px; border-radius: 10px; border: none; background: var(--pastel-blue); }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard">
+        <h1>📸 Photo Booth Ceria! ✨</h1>
+        <button class="btn" onclick="startCamera()">Mulai Foto Yuk! 🌸</button>
+    </div>
+
+    <div id="booth-area">
+        <video id="video" autoplay></video>
+        <canvas id="photo-canvas" style="display:none;"></canvas>
+        
+        <div class="controls">
+            <button onclick="takePhoto()" class="btn">Capture! 💖</button>
+            <button class="filter-btn" onclick="applyFilter('grayscale(100%)')">Monokrom</button>
+            <button class="filter-btn" onclick="applyFilter('sepia(100%)')">Vintage</button>
+            <button class="filter-btn" onclick="applyFilter('none')">Normal</button>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('photo-canvas');
+
+        async function startCamera() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('booth-area').style.display = 'block';
+            
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        }
+
+        function applyFilter(filter) {
+            video.style.filter = filter;
+        }
+
+        function takePhoto() {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.filter = video.style.filter;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Tambahkan Stiker (Contoh sederhana)
+            context.font = "50px Arial";
+            context.fillText("✨", 50, 50);
+            
+            canvas.style.display = 'block';
+            video.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
