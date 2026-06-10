@@ -3,95 +3,95 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Photo Booth Lucu Pastel ✨</title>
+    <title>Pretty Things ✨</title>
     <style>
-        :root {
-            --pastel-pink: #FFD1DC;
-            --pastel-blue: #AEC6CF;
-            --pastel-yellow: #FDFD96;
-            --bg-color: #FFF5F7;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            text-align: center;
-            color: #555;
-        }
-
-        #dashboard { padding: 50px; }
+        :root { --pastel-pink: #FFD1DC; --pastel-blue: #AEC6CF; --cream: #FFF5F7; }
+        body { background-color: var(--cream); font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .wrapper { background: white; padding: 25px; border-radius: 40px; border: 8px solid var(--pastel-pink); box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; }
         
-        .btn {
-            padding: 15px 30px;
-            font-size: 20px;
-            background-color: var(--pastel-pink);
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            box-shadow: 0 4px #ffb3c1;
-        }
-
-        #booth-area { display: none; }
-
-        video, #photo-canvas {
-            width: 500px;
-            border: 10px solid white;
-            border-radius: 20px;
-            background: #eee;
-        }
-
-        .controls { margin-top: 20px; }
-        .filter-btn { margin: 5px; padding: 10px; border-radius: 10px; border: none; background: var(--pastel-blue); }
+        #video { border-radius: 20px; border: 5px solid #eee; width: 400px; }
+        #canvas-output { display: none; border-radius: 20px; width: 400px; }
+        
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        button { padding: 12px; border: none; border-radius: 15px; background: var(--pastel-blue); color: white; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: var(--pastel-pink); }
     </style>
 </head>
 <body>
 
-    <div id="dashboard">
-        <h1>📸 Photo Booth Ceria! ✨</h1>
-        <button class="btn" onclick="startCamera()">Mulai Foto Yuk! 🌸</button>
-    </div>
+    <h1>✨ Pretty Things ✨</h1>
 
-    <div id="booth-area">
-        <video id="video" autoplay></video>
-        <canvas id="photo-canvas" style="display:none;"></canvas>
+    <div class="wrapper">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas-output" width="800" height="1800"></canvas>
         
-        <div class="controls">
-            <button onclick="takePhoto()" class="btn">Capture! 💖</button>
-            <button class="filter-btn" onclick="applyFilter('grayscale(100%)')">Monokrom</button>
-            <button class="filter-btn" onclick="applyFilter('sepia(100%)')">Vintage</button>
-            <button class="filter-btn" onclick="applyFilter('none')">Normal</button>
+        <div class="controls" id="menu">
+            <button onclick="takePhoto()">📸 Capture (1/3)</button>
+            <button onclick="applyFilter('sepia(60%)')">Filter: Vintage</button>
+            <button onclick="addSticker('🎀')">Stiker: Pita</button>
+            <button onclick="addSticker('💖')">Stiker: Hati</button>
+            <button onclick="resetBooth()">Reset</button>
+            <button onclick="downloadPhoto()">💾 Save Photo</button>
         </div>
     </div>
 
     <script>
         const video = document.getElementById('video');
-        const canvas = document.getElementById('photo-canvas');
+        const canvas = document.getElementById('canvas-output');
+        const ctx = canvas.getContext('2d');
+        let photos = [];
 
-        async function startCamera() {
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('booth-area').style.display = 'block';
-            
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
-        }
+        // Akses Kamera
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
 
-        function applyFilter(filter) {
-            video.style.filter = filter;
-        }
+        function applyFilter(f) { video.style.filter = f; }
 
         function takePhoto() {
-            const context = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.filter = video.style.filter;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            // Tambahkan Stiker (Contoh sederhana)
-            context.font = "50px Arial";
-            context.fillText("✨", 50, 50);
-            
+            if (photos.length < 3) {
+                const temp = document.createElement('canvas');
+                temp.width = 600; temp.height = 450;
+                temp.getContext('2d').filter = video.style.filter;
+                temp.getContext('2d').drawImage(video, 0, 0, 600, 450);
+                photos.push(temp.toDataURL());
+                if (photos.length === 3) renderFinal();
+            }
+        }
+
+        function renderFinal() {
             canvas.style.display = 'block';
             video.style.display = 'none';
+            ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, 800, 1800);
+            
+            photos.forEach((p, i) => {
+                let img = new Image();
+                img.onload = () => ctx.drawImage(img, 100, 100 + (i * 500), 600, 450);
+                img.src = p;
+            });
+
+            // Logika Frame (Ganti 'frame.png' dengan file gambar frame Anda)
+            /*
+            let frame = new Image();
+            frame.src = 'frame.png'; 
+            frame.onload = () => ctx.drawImage(frame, 0, 0, 800, 1800);
+            */
+        }
+
+        function addSticker(s) {
+            ctx.font = "100px Arial";
+            ctx.fillText(s, Math.random() * 600, Math.random() * 1600);
+        }
+
+        function downloadPhoto() {
+            const link = document.createElement('a');
+            link.download = 'pretty-things-result.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function resetBooth() {
+            photos = [];
+            video.style.display = 'block';
+            canvas.style.display = 'none';
         }
     </script>
 </body>
